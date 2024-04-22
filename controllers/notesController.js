@@ -12,12 +12,17 @@ const getAllNotes = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'No notes found' });
   }
 
+  // console.log({notes});
+
   const notesWithUser = await Promise.all(
     notes.map(async note => {
-      const user = await User.findOne({ user: note.user }).lean().exec();
-      return { ...note, username: user.username };
+      const user = await User.findOne({ _id: note.user }).select('-password').lean().exec();
+      // console.log({user});
+      return { ...note, username: user?.username ?? '' };
     })
   );
+
+  res.json(notesWithUser);
 });
 
 // @desc Get all notes
